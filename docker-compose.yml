@@ -1,0 +1,46 @@
+version: "3.8"
+
+services:
+  app:
+    build: ./backend
+    container_name: vch-backend
+    ports:
+      - "3000:3000"
+    volumes:
+      - video-uploads:/usr/src/app/uploads
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_PORT=${DB_PORT}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+    depends_on:
+      - postgres-db
+      - redis-cache
+
+  postgres-db:
+    image: postgres:13-alpine
+    container_name: vch-postgres
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  redis-cache:
+    image: redis:alpine
+    container_name: vch-redis
+    ports:
+      - "6379:6379"
+    # NUEVO: Persistencia para Redis
+    volumes:
+      - redis-data:/data
+
+volumes:
+  pgdata:
+  video-uploads:
+  redis-data: # Declaramos el nuevo volumen de Redis
