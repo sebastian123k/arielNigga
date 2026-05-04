@@ -29,40 +29,32 @@ async function fetchVideos(search = "") {
 function renderVideos(videos) {
     const grid = document.getElementById("videoGrid");
     if (videos.length === 0) {
-        grid.innerHTML = `<p class="text-slate-500 col-span-full text-center py-20 font-light italic">No se encontraron archivos.</p>`;
+        grid.innerHTML = `<p class="empty-msg">No archives found.</p>`;
         return;
     }
 
     grid.innerHTML = videos.map(v => {
-        // Si hay una playlist activa, el botón de borrar quita el video de esa playlist.
-        // Si no, borra el video del sistema.
-        const deleteAction = currentPlaylistId 
-            ? `removeFromPlaylist(${v.id})` 
+        const deleteAction = currentPlaylistId
+            ? `removeFromPlaylist(${v.id})`
             : `deleteVideo(${v.id})`;
-        
-        const deleteLabel = currentPlaylistId ? "REMOVE" : "DELETE";
+        const deleteLabel = currentPlaylistId ? "Remove" : "Delete";
 
         return `
-        <div class="video-card group">
-            <div class="aspect-video bg-slate-900 relative cursor-pointer overflow-hidden" 
-                 onclick="openPlayer(${v.id}, '${v.url_video}', '${v.titulo}')">
-                <div class="absolute inset-0 bg-blue-600/0 group-hover:bg-blue-600/10 transition-all flex items-center justify-center">
-                    <div class="w-12 h-12 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all border border-white/20">
-                        <span class="text-white text-xs ml-1">▶</span>
-                    </div>
+        <div class="video-item">
+            <div class="item-thumb" onclick="openPlayer(${v.id}, '${v.url_video}', '${v.titulo}')">
+                <div class="thumb-overlay">
+                    <div class="play-dot">▶</div>
                 </div>
             </div>
-            <div class="p-6">
-                <div class="flex justify-between items-start mb-2">
-                    <span class="text-[10px] font-bold text-blue-500 uppercase tracking-[0.2em]">${v.categoria || "General"}</span>
-                    <div class="flex gap-3">
-                        <button onclick="promptAddToPlaylist(${v.id})" class="text-blue-400 hover:text-white transition-colors text-[10px] font-bold tracking-tighter">+ LIST</button>
-                        <button onclick="openEditor(${v.id})" class="text-slate-600 hover:text-white transition-colors text-[10px] font-bold tracking-tighter">EDIT</button>
-                        <button onclick="${deleteAction}" class="text-slate-600 hover:text-red-400 transition-colors text-[10px] font-bold tracking-tighter">${deleteLabel}</button>
-                    </div>
-                </div>
-                <h4 class="text-white font-medium text-lg leading-snug mb-2 truncate">${v.titulo}</h4>
-                <p class="text-slate-500 text-xs font-light line-clamp-2">${v.descripcion || ""}</p>
+            <div class="item-meta">
+                <span class="category-tag">${v.categoria || "General"}</span>
+                <h4 class="item-title">${v.titulo}</h4>
+                <p class="item-desc">${v.descripcion || ""}</p>
+            </div>
+            <div class="item-actions">
+                <button onclick="promptAddToPlaylist(${v.id})" class="action-btn action-accent">+ List</button>
+                <button onclick="openEditor(${v.id})" class="action-btn">Edit</button>
+                <button onclick="${deleteAction}" class="action-btn action-danger">${deleteLabel}</button>
             </div>
         </div>`;
     }).join("");
@@ -351,16 +343,10 @@ function renderPlaylistSidebar(playlists) {
     const container = document.getElementById("playlistSidebarList");
     container.innerHTML = playlists
         .map(p => `
-            <div class="group flex items-center justify-between nav-item hover:bg-slate-900 rounded-lg pr-2 transition-all">
-                <a href="#" onclick="loadPlaylistContent(${p.id}, '${p.nombre}')" 
-                   class="text-xs font-light py-2 px-4 flex items-center gap-3 flex-1">
-                    <span class="text-blue-500/50">#</span> ${p.nombre}
-                </a>
-                <button onclick="deletePlaylist(${p.id}, event)" 
-                        class="opacity-0 group-hover:opacity-100 text-slate-600 hover:text-red-500 transition-all text-[10px]">
-                    ✕
-                </button>
-            </div>
+            <a href="#" onclick="loadPlaylistContent(${p.id}, '${p.nombre}')" class="playlist-pill">
+                <span class="pill-hash">#</span>${p.nombre}
+                <button onclick="deletePlaylist(${p.id}, event)" class="pill-del">×</button>
+            </a>
         `).join("");
 }
 
@@ -401,14 +387,10 @@ async function promptAddToPlaylist(videoId) {
       return;
     }
 
-    // Renderizar las opciones dentro del modal
     container.innerHTML = playlists.map(p => `
-      <button 
-        onclick="confirmAddToPlaylist(${p.id})"
-        class="w-full text-left p-4 rounded-2xl bg-slate-950 border border-slate-800 hover:border-blue-600 hover:bg-blue-600/5 transition-all flex items-center justify-between group"
-      >
-        <span class="text-sm font-medium text-slate-300 group-hover:text-white"># ${p.nombre}</span>
-        <span class="text-blue-500 opacity-0 group-hover:opacity-100">＋</span>
+      <button onclick="confirmAddToPlaylist(${p.id})" class="playlist-option">
+        <span class="po-name"># ${p.nombre}</span>
+        <span class="po-plus">+</span>
       </button>
     `).join("");
 

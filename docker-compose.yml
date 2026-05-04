@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   app:
-    build: ./backend
+    image: pikachu1234fma/video-cloud-hub-main-app
     container_name: vch-backend
     ports:
       - "3000:3000"
